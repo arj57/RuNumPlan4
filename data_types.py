@@ -19,7 +19,7 @@ InpRecords = list[InpRecord]
 class InpData(NamedTuple):
     src_filename: str
     dst_filename: str
-    cdr_records: InpRecords
+    records: InpRecords
 
 
 class OutRecord(NamedTuple):
@@ -39,7 +39,7 @@ OutRecords = list[OutRecord]
 class OutData(NamedTuple):
     src_filename: str
     dst_filename: str
-    cdr_records: OutRecords
+    records: OutRecords
 
 
 

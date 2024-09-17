@@ -3,7 +3,7 @@ from config import Config
 import importlib
 import inspect
 from abstract_reader import AbstractReader
-from abstract_writer import AbstractWriter
+# from abstract_writer import AbstractWriter
 from url import Url
 
 
@@ -21,7 +21,7 @@ class RuNumPlan4:
     @staticmethod
     def reader_factory(config: Config) -> AbstractReader:
         src_url_scheme: str = Url(config.get_param_val(r"/Src/Url")).scheme
-        mod_name = src_url_scheme + 'reader'
+        mod_name = src_url_scheme + '_reader'
         class_name = src_url_scheme.capitalize() + 'Reader'
         mod = importlib.import_module(mod_name)
         try:
@@ -33,7 +33,7 @@ class RuNumPlan4:
     # @staticmethod
     # def writer_factory(config: Config) -> AbstractWriter:
     #     dst_url_scheme: str = Url(config.get_param_val(r"/Dst/Url")).scheme
-    #     mod_name = dst_url_scheme + 'writer'
+    #     mod_name = dst_url_scheme + '_writer'
     #     class_name = dst_url_scheme.capitalize() + 'Writer'
     #     mod = importlib.import_module(mod_name)
     #     try:

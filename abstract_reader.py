@@ -28,18 +28,18 @@ class AbstractReader(object):
     def download_data(self, filename: str) -> None:
         pass
 
-    def get_parsed_data(self, filename: str) -> datatypes.InpData:
+    def get_parsed_data(self, filename: str) -> data_types.InpData:
         os.chdir(self.input_dir)
         with open(filename, 'r') as fin:
             logger.info("Читаем данные из файла '%s'..." % filename)
             cdr_list = fin.readlines()
         csv_extra_parameters = self.get_csv_extra_parameters()
         csv.register_dialect('custom-dialect', ** csv_extra_parameters)
-        src_data: datatypes.InpRecords = list(csv.DictReader(cdr_list,
+        src_data: data_types.InpRecords = list(csv.DictReader(cdr_list,
                                                              fieldnames=self.src_fields,
                                                              dialect='custom-dialect')
                                               )
-        return datatypes.InpData(src_filename=filename, dst_filename=filename, cdr_records=src_data)
+        return data_types.InpData(src_filename=filename, dst_filename=filename, records=src_data)
 
     @abstractmethod
     def close(self) -> None:
