@@ -1,0 +1,116 @@
+<data>
+    <DryRun type="bool">false</DryRun>
+    <InputDataDir>InputData</InputDataDir>
+    <Src>
+<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-3xx.csv'</url>-->
+<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-4xx.csv'</url>-->
+<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-8xx.csv'</url>-->
+        <Url>file:testData/ABC-8xx.csv</Url>
+
+<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-9xx.csv'</url>-->
+        <CsvExtraParameters>
+            <delimiter>;</delimiter>
+            <lineterminator>\r\n</lineterminator>
+        </CsvExtraParameters>
+    </Src>
+    <Dst>
+<!--        <Url>mysql://login:passwd@host_ip/database</Url>-->
+        <url>mysql://login:password@192.168.4.5/dbname</url>
+    </Dst>
+
+    <Converter>
+        <OnKeyErrorAction> WARNING</OnKeyErrorAction>
+        <SrcFields>
+            <Field>
+                <Name>ABC</Name>
+            </Field>
+            <Field>
+                <Name>FROM</Name>
+            </Field>
+            <Field>
+                <Name>TO</Name>
+            </Field>
+            <Field>
+                <Name>CAPACITY</Name>
+            </Field>
+            <Field>
+                <Name>OPERATOR</Name>
+            </Field>
+            <Field>
+                <Name>REGION</Name>
+            </Field>
+            <Field>
+                <Name>GAR_REGION</Name>
+            </Field>
+            <Field>
+                <Name>INN</Name>
+            </Field>
+        </SrcFields>
+        <DstFields>
+            <Field>
+                <Name>ABC</Name>
+                <CopyFrom>
+                    <Source>ABC</Source>
+<!--                    <Mapper>ReleaseCauses</Mapper>-->
+                </CopyFrom>
+                <Type>int</Type>
+            </Field>
+            <Field>
+                <Name>FROM</Name>
+                <CopyFrom>
+                    <Source>FROM</Source>
+<!--                    <Mapper>ReleaseCauses</Mapper>-->
+                </CopyFrom>
+                <Type>int</Type>
+            </Field>
+            <Field>
+                <Name>ABC</Name>
+                <CopyFrom>
+                    <Source>ABC</Source>
+<!--                    <Mapper>ReleaseCauses</Mapper>-->
+                </CopyFrom>
+                <Type>int</Type>
+            </Field>
+            <Field>
+                <Name>ABC</Name>
+                <CopyFrom>
+                    <Source>ABC</Source>
+<!--                    <Mapper>ReleaseCauses</Mapper>-->
+                </CopyFrom>
+                <Type>int</Type>
+            </Field>
+            <Field>
+                <Name>ABC</Name>
+                <CopyFrom>
+                    <Source>ABC</Source>
+<!--                    <Mapper>ReleaseCauses</Mapper>-->
+                </CopyFrom>
+                <Type>int</Type>
+            </Field>
+            <Field>
+                <Name>ABC</Name>
+                <CopyFrom>
+                    <Source>ABC</Source>
+<!--                    <Mapper>ReleaseCauses</Mapper>-->
+                </CopyFrom>
+                <Type>int</Type>
+            </Field>
+            <Field>
+                <Name>ABC</Name>
+                <CopyFrom>
+                    <Source>ABC</Source>
+<!--                    <Mapper>ReleaseCauses</Mapper>-->
+                </CopyFrom>
+                <Type>int</Type>
+            </Field>
+        </DstFields>
+
+    </Converter>
+    <Logging>
+        <LogFile>numplan.log</LogFile>
+        <!--FATAL, ERROR, WARNING, INFO, DEBUG-->
+        <LogLevel>DEBUG</LogLevel>
+        <Silence type="bool">false</Silence>
+    </Logging>
+
+</data>
