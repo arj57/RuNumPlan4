@@ -1,11 +1,13 @@
 import glob
 import os.path
 import shutil
+from datetime import datetime, timezone
 
 import app_logger
 import config
 from overrides import override
 from abstract_reader import AbstractReader
+from data_types import Metadata
 
 logger = app_logger.get_logger(__name__)
 
@@ -34,11 +36,15 @@ class FileReader(AbstractReader):
         return filelist
 
     @override()
-    def download_data(self, filename: str) -> None:
+    def download_data_to_tmp(self, filename: str) -> Metadata:
         # TODO: check permissions
-        p_src = os.path.abspath(os.path.basename(filename))
-        p_dst = os.path.abspath(self.input_dir)
-        shutil.copy2(p_src, p_dst)  # with creation time
+        src_abs_path = os.path.abspath(os.path.basename(filename))
+        dst_dir = os.path.abspath(self.input_dir)
+        shutil.copy2(src_abs_path, dst_dir)  # with creation time
+
+        d = datetime.fromtimestamp(os.path.getctime(src_abs_path), tz=timezone.utc)
+        md = Metadata(src_filename=os.path.basename(filename), created_date=d)
+        return md
 
     @override()
     def close(self) -> None:

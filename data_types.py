@@ -1,35 +1,30 @@
-import typing
+# import typing
 from datetime import datetime
 from typing import TypedDict, NamedTuple
 
 
-class InpRecord(NamedTuple):
-    abc: int
-    begin: int
-    end: int
-    capacity: int
-    operator: str
-    region: str
-    reg_gar: str
-    inn: int
+class Metadata(NamedTuple):
+    src_filename: str
+    created_date: datetime
 
+# Only type = str for csv
+InpRecord = dict[str, str]
 InpRecords = list[InpRecord]
 
 
 class InpData(NamedTuple):
-    src_filename: str
-    dst_filename: str
+    metadata: Metadata
     records: InpRecords
 
 
-class OutRecord(NamedTuple):
+class OutRecord(TypedDict):
     abc: int
     begin: int
     end: int
     capacity: int
-    operator: str
+    # operator: str
     # region: str
-    reg_gar: str
+    reg_gar_id: str
     inn: int
 
 
@@ -37,21 +32,10 @@ OutRecords = list[OutRecord]
 
 
 class OutData(NamedTuple):
-    src_filename: str
-    dst_filename: str
+    metadata: Metadata
     records: OutRecords
 
 
-
-
-class TMetadata(TypedDict):
-    loaded_file: str
-    nas_id: int
-    records: int
-    dt_start: datetime
-    dt_end: datetime
-    start_id: typing.Optional[int]
-    end_id: typing.Optional[int]
 
 
 class DbConnectionParameters(TypedDict):

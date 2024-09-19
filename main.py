@@ -1,8 +1,11 @@
 import app_logger
+from abstract_converter import AbstractConverter
 from config import Config
 import importlib
 import inspect
 from abstract_reader import AbstractReader
+from data_types import OutData, InpData
+from num_plan_converter import NumPlanConverter
 # from abstract_writer import AbstractWriter
 from url import Url
 
@@ -44,9 +47,10 @@ class RuNumPlan4:
 
     def process(self) -> None:
         for src_filename in self.filenames_to_process:
-            self.src.download_data(src_filename)
             # TODO: check if data is fresh
-            src_data = self.src.get_parsed_data(src_filename)
+            src_data: InpData = self.src.get_parsed_data(src_filename, skip_header=True)
+            converter: AbstractConverter = NumPlanConverter(self.conf)
+            dst_data: OutData = converter.get_converted_data(src_data)
             pass
 
 
