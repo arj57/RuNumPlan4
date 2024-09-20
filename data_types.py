@@ -1,4 +1,5 @@
 # import typing
+import typing
 from datetime import datetime
 from typing import TypedDict, NamedTuple
 
@@ -16,16 +17,16 @@ class InpData(NamedTuple):
     metadata: Metadata
     records: InpRecords
 
-
-class OutRecord(TypedDict):
-    abc: int
-    begin: int
-    end: int
-    capacity: int
-    # operator: str
-    # region: str
-    reg_gar_id: str
-    inn: int
+OutRecord = dict[str, typing.Any]
+# class OutRecord(TypedDict):
+#     abc: int
+#     begin: int
+#     end: int
+#     capacity: int
+#     # operator: str
+#     # region: str
+#     reg_gar_id: str
+#     inn: int
 
 
 OutRecords = list[OutRecord]
@@ -44,3 +45,17 @@ class DbConnectionParameters(TypedDict):
     password: str
     database: str
     port: int
+
+
+class Location(NamedTuple):
+    id: bytes
+    parent_id: bytes
+    level: int
+    title: str
+
+
+Locations = list[Location]
+IdTitle = dict[int, str]
+# class IdTitle(TypedDict):
+#     id: int
+#     title: str
