@@ -1,7 +1,7 @@
 # import typing
 import typing
 from datetime import datetime
-from typing import TypedDict, NamedTuple
+from typing import TypedDict, NamedTuple, Optional
 
 
 class Metadata(NamedTuple):
@@ -47,14 +47,16 @@ class DbConnectionParameters(TypedDict):
     port: int
 
 
-class Location(NamedTuple):
-    id: bytes
-    parent_id: bytes
+class LocData(NamedTuple):
+    parent_id: Optional[bytes]
     level: int
     title: str
 
 
-Locations = list[Location]
+class Location(TypedDict):
+    id: bytes
+    data: LocData
+
 IdTitle = dict[int, str]
 # class IdTitle(TypedDict):
 #     id: int
