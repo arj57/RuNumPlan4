@@ -14,93 +14,82 @@
         </CsvExtraParameters>
     </Src>
     <Dst>
-<!--        <Url>mysql://login:passwd@host_ip/database</Url>-->
-        <url>mysql://login:password@192.168.4.5/dbname</url>
+        <Url>mysql://login:passwd@host_ip/database</Url>
     </Dst>
 
     <Converter>
         <OnKeyErrorAction> WARNING</OnKeyErrorAction>
         <SrcFields>
             <Field>
-                <Name>ABC</Name>
+                <Name>Abc</Name>
             </Field>
             <Field>
-                <Name>FROM</Name>
+                <Name>From</Name>
             </Field>
             <Field>
-                <Name>TO</Name>
+                <Name>To</Name>
             </Field>
             <Field>
-                <Name>CAPACITY</Name>
+                <Name>Capacity</Name>
             </Field>
             <Field>
-                <Name>OPERATOR</Name>
+                <Name>Operator</Name>
             </Field>
             <Field>
-                <Name>REGION</Name>
+                <Name>Region</Name>
             </Field>
             <Field>
-                <Name>GAR_REGION</Name>
+                <Name>GarRegion</Name>
             </Field>
             <Field>
-                <Name>INN</Name>
+                <Name>Inn</Name>
             </Field>
         </SrcFields>
         <DstFields>
             <Field>
-                <Name>ABC</Name>
-                <CopyFrom>
-                    <Source>ABC</Source>
-<!--                    <Mapper>ReleaseCauses</Mapper>-->
-                </CopyFrom>
+                <Name>Abc</Name>
+                <Source>Abc</Source>
                 <Type>int</Type>
             </Field>
             <Field>
-                <Name>FROM</Name>
-                <CopyFrom>
-                    <Source>FROM</Source>
-<!--                    <Mapper>ReleaseCauses</Mapper>-->
-                </CopyFrom>
+                <Name>From</Name>
+                <Source>From</Source>
                 <Type>int</Type>
             </Field>
             <Field>
-                <Name>ABC</Name>
-                <CopyFrom>
-                    <Source>ABC</Source>
-<!--                    <Mapper>ReleaseCauses</Mapper>-->
-                </CopyFrom>
+                <Name>To</Name>
+                <Source>To</Source>
                 <Type>int</Type>
             </Field>
             <Field>
-                <Name>ABC</Name>
-                <CopyFrom>
-                    <Source>ABC</Source>
-<!--                    <Mapper>ReleaseCauses</Mapper>-->
-                </CopyFrom>
+                <Name>Capacity</Name>
+                <Source>Capacity</Source>
                 <Type>int</Type>
             </Field>
+<!--            <Field>-->
+<!--                <Name>OPERATOR</Name>-->
+<!--                <CopyFrom>-->
+<!--                    <Source>OPERATOR</Source>-->
+<!--                </CopyFrom>-->
+<!--                <Type>str</Type>-->
+<!--            </Field>-->
+<!--            <Field>-->
+<!--                <Name>REGION</Name>-->
+<!--                <CopyFrom>-->
+<!--                    <Source>REGION</Source>-->
+<!--                </CopyFrom>-->
+<!--                <Type>str</Type>-->
+<!--            </Field>-->
             <Field>
-                <Name>ABC</Name>
-                <CopyFrom>
-                    <Source>ABC</Source>
-<!--                    <Mapper>ReleaseCauses</Mapper>-->
-                </CopyFrom>
-                <Type>int</Type>
+                <Name>RegionId</Name>
+                <Source>Region</Source>
+                <Type>str</Type>
+<!--                <Action>AddToLocationMap</Action>-->
             </Field>
             <Field>
-                <Name>ABC</Name>
-                <CopyFrom>
-                    <Source>ABC</Source>
-<!--                    <Mapper>ReleaseCauses</Mapper>-->
-                </CopyFrom>
-                <Type>int</Type>
-            </Field>
-            <Field>
-                <Name>ABC</Name>
-                <CopyFrom>
-                    <Source>ABC</Source>
-<!--                    <Mapper>ReleaseCauses</Mapper>-->
-                </CopyFrom>
+                <Name>Inn</Name>
+                <Source>Inn</Source>
+                <Action>AddToOpInnTitleMap</Action>
                 <Type>int</Type>
             </Field>
         </DstFields>

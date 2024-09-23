@@ -24,7 +24,7 @@ class AbstractConverter(object):
         self.config = config
         self.dst_fields_metadata_map: dict[str, DstFieldMetadata] = self.get_dst_fields_metadata()
         self.op_id_titles: data_types.IdTitle = {}
-        self.locations: data_types.Locations = []
+        self.locations: dict[bytes, data_types.LocData] = {}
         self.total_loc_indexes: list[bytes] = []
 
     def get_converted_data(self, input_data: data_types.InpData) -> data_types.OutData:

@@ -17,6 +17,7 @@ class InpData(NamedTuple):
     metadata: Metadata
     records: InpRecords
 
+
 OutRecord = dict[str, typing.Any]
 # class OutRecord(TypedDict):
 #     abc: int
@@ -37,8 +38,6 @@ class OutData(NamedTuple):
     records: OutRecords
 
 
-
-
 class DbConnectionParameters(TypedDict):
     host: str
     user: str
@@ -53,9 +52,15 @@ class LocData(NamedTuple):
     title: str
 
 
-class Location(TypedDict):
+class Location(NamedTuple):
     id: bytes
     data: LocData
+
+
+class TT(NamedTuple):
+    curr_locations: list[Location]
+    joined_names: str
+
 
 IdTitle = dict[int, str]
 # class IdTitle(TypedDict):
