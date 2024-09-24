@@ -17,7 +17,7 @@ class AbstractWriter(object):
         self.fields_list = self.get_fields_list()
 
     @abstractmethod
-    def put_data(self, data2: data_types.OutData) -> None:
+    def put_data(self, data: data_types.OutData) -> None:
         raise NotImplementedError
 
     @abstractmethod

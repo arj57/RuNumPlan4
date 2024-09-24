@@ -73,10 +73,10 @@ class NumPlanConverter(AbstractConverter):
             src_field_name: str = self.dst_fields_metadata_map[dst_field_name].src_field_name
             src_field_val: str = src_row[src_field_name]
 
-            if dst_field_name == 'Inn':
+            if dst_field_name == 'op_inn':
                 dst_row[dst_field_name] = int(src_field_val)
                 self.store_operator_id_title(int(dst_row[dst_field_name]), src_row['Operator'])
-            elif dst_field_name == 'RegionId':
+            elif dst_field_name == 'loc_id':
                 curr_loc_objects: list[data_types.Location] = _get_location_data(src_field_val)
                 dst_row[dst_field_name] = curr_loc_objects[-1].id
                 self.store_locations(curr_loc_objects)

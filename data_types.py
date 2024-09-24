@@ -24,20 +24,6 @@ class InpData(NamedTuple):
     records: InpRecords
 
 
-OutRow = dict[str, typing.Any]
-# class OutRecord(TypedDict):
-#     abc: int
-#     begin: int
-#     end: int
-#     capacity: int
-#     # operator: str
-#     # region: str
-#     reg_gar_id: str
-#     inn: int
-
-
-OutRows = list[OutRow]
-
 
 
 class DbConnectionParameters(TypedDict):
@@ -58,6 +44,20 @@ class Location(NamedTuple):
 
     id: bytes
     data: Value
+
+OutRow = dict[str, typing.Any]
+# class OutRecord(TypedDict):
+#     abc: int
+#     begin: int
+#     end: int
+#     capacity: int
+#     # operator: str
+#     # region: str
+#     reg_gar_id: str
+#     inn: int
+
+OutRows = list[OutRow]
+
 
 
 class OutData(NamedTuple):

@@ -54,16 +54,19 @@ class MysqlWriter(AbstractWriter):
         logger.info("Rollback.")
 
     @override()
-    def put_data(self, data2: data_types.OutData) -> None:
+    def put_data(self, data: data_types.OutData) -> None:
+        self.put_rows(data.rows)
+
+    def put_rows(self, rows: data_types.OutRows) -> None:
         cursor = self.conn.cursor()
         fields_list: list[str] = self.get_fields_list()
 
         # meta = MysqlMetadata(data2, self.conn)
         try:
-            ins_query = " INSERT INTO cdrs (" + ",".join(fields_list) + ") VALUES(" + (
+            ins_query = " INSERT INTO op_data (" + ",".join(fields_list) + ") VALUES(" + (
                     "%s," * len(fields_list)).strip(",") + ")"
 
-            cursor.executemany(ins_query, self.__dicts_to_tuples(data2['cdr_records']))
+            cursor.executemany(ins_query, self.__dicts_to_tuples(rows))
             if bool(self.config.get_param_val("./DryRun")):
                 logger.info("Dry run, not commited")
             else:
@@ -90,29 +93,9 @@ class MysqlWriter(AbstractWriter):
     #         res.append(t)
     #     return res
 
-    # def __dicts_to_tuples(self, data: data_types.InpRecords) -> list[data_types.TupRec]:
-    #     """
-    #     Typecasting of each field of record according to config
-    #     """
-
-        # r: data_types.Records = data['cdr_records']
-        # def record_typecasting(str_rec: data_types.InpRecord) -> data_types.TupRec:
-        #     val_list: list = list(str_rec.values())
-        #     for i in range(len(val_list)):
-        #         # if self.fieldtypes[i] == "str":
-        #         #     continue
-        #         if val_list[i] is None:
-        #             continue
-        #         elif val_list[i] == "":
-        #             val_list[i] = None
-        #         elif self.fields_types[i] == "int":
-        #             val_list[i] = int(val_list[i])
-        #         elif self.fields_types[i] == "datetime":
-        #             val_list[i] = datetime.strptime(val_list[i], '%Y-%m-%d %H:%M:%S')
-        #     return tuple(val_list)
-        #
-        # r2 = list(map(record_typecasting, data))
-        # return r2
+    def __dicts_to_tuples(self, rows: data_types.OutRows) -> list[tuple]:
+        r2 = list(map(lambda x: tuple(x.values()), rows))
+        return r2
 
 
 # class MysqlMetadata(AbstractMetadata):
