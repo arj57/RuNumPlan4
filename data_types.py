@@ -58,10 +58,6 @@ class Location(NamedTuple):
     data: Value
 
 
-class TT(NamedTuple):
-    curr_locations: list[Location]
-    joined_names: str
-
 
 IdTitle = dict[int, str]
 # class IdTitle(TypedDict):
