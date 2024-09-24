@@ -1,8 +1,5 @@
 import hashlib
-import typing
-from typing import Callable, Optional, NamedTuple, TypedDict, Literal
-
-from setuptools.extern import names
+from typing import Callable, Optional
 
 import data_types
 from abstract_converter import AbstractConverter
@@ -31,7 +28,7 @@ class NumPlanConverter(AbstractConverter):
                 dst_row[dst_field_name] = int(src_field_val)
                 self.store_operator_id_title(int(dst_row[dst_field_name]), src_row['Operator'])
             elif dst_field_name == 'RegionId':
-                curr_locations: list[data_types.Location] = self._get_location_data(src_field_val).curr_locations
+                curr_locations: list[data_types.Location] = self._get_location_data(src_field_val)
                 dst_row[dst_field_name] = curr_locations[-1].id
                 self.store_locations(curr_locations)
             else:
@@ -39,14 +36,14 @@ class NumPlanConverter(AbstractConverter):
 
         return dst_row
 
-    def _get_location_data(self, full_location: str) -> Optional[data_types.TT]:
+    def _get_location_data(self, full_location: str) -> list[data_types.Location]:
         """
           Получение списка объектов Location из строки с локейшеном ([[населенный пункт|]район|]область)
-         :parameter parsed_locations - список строк с иерархией локейшенов
+         :parameter full_location - строка с локейшеном
          :return - список объектов Location ( [{id, parent_id, title}, ...] - для каждого распарсенного локейшена)
         """
         loc_parts: list[str] = full_location.strip().rsplit(sep='|', maxsplit=2)  # [point], [rayon], oblast
-        return self._get_parsed_locations_list(loc_parts)
+        return self._get_parsed_locations_list(loc_parts).curr_locations
 
     # class LocData(NamedTuple):
     #     parent_id: Optional[bytes]
@@ -60,14 +57,15 @@ class NumPlanConverter(AbstractConverter):
     # class TT(NamedTuple):
     #     curr_locations: list[data_types.Location]
     #     joined_names: str
-    def _get_parsed_locations_list(self, parsed_locations: list[str], tmp_data: data_types.TT = None) -> Optional[data_types.TT]:
+    def _get_parsed_locations_list(self, parsed_locations: list[str], tmp_data: data_types.TT = None) -> data_types.TT:
         """
            Получение списка объектов Location из списка строк с иерархией локейшенов (область, район, населенный пункт). Вспомогательный метод.
          :parameter parsed_locations - список строк с иерархией локейшенов
-         :return - список объектов Location ( [{id, parent_id, title}, ...] - для каждого распарсенного локейшена), а также joined_names - необходим для рекурс. вызова
+         :return - кортеж: список объектов Location ([{id, parent_id, title}, ...] - для каждого распарсенного локейшена), а также joined_names - необходим для рекурс. вызова
+         :exception ValueError - if parsed locations list is empty
         """
         if len(parsed_locations) == 0:
-            return None
+            raise ValueError('Parsed locations list is empty')
         else:
             partial_name: str = parsed_locations.pop().strip()
             if tmp_data is None:
@@ -82,7 +80,7 @@ class NumPlanConverter(AbstractConverter):
                 joined_names = tmp_data.joined_names + '|' + partial_name
 
             loc_key: bytes = _my_hash(joined_names.encode('utf-8'))
-            loc_val = data_types.LocData(parent_id=parent_id, level=level, title=partial_name)
+            loc_val = data_types.Location.Value(parent_id=parent_id, level=level, title=partial_name)
             location = Location( id=loc_key, data=loc_val)
             current_locations.append(location)
             tmp_data = data_types.TT(curr_locations=current_locations, joined_names=joined_names)
@@ -92,8 +90,8 @@ class NumPlanConverter(AbstractConverter):
             else:
                 return self._get_parsed_locations_list(parsed_locations, tmp_data)
 
-    def store_operator_id_title(self, id: int, title: str) -> None:
-        self.op_id_titles.setdefault(id, title)
+    def store_operator_id_title(self, op_id: int, title: str) -> None:
+        self.op_id_titles.setdefault(op_id, title)
 
     def store_locations(self, curr_locations: list[data_types.Location]) -> None:
         for loc in curr_locations:

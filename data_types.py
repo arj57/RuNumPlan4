@@ -46,15 +46,16 @@ class DbConnectionParameters(TypedDict):
     port: int
 
 
-class LocData(NamedTuple):
-    parent_id: Optional[bytes]
-    level: int
-    title: str
 
 
 class Location(NamedTuple):
+    class Value(NamedTuple):
+        parent_id: Optional[bytes]
+        level: int
+        title: str
+
     id: bytes
-    data: LocData
+    data: Value
 
 
 class TT(NamedTuple):
