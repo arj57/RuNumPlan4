@@ -4,6 +4,12 @@ from datetime import datetime
 from typing import TypedDict, NamedTuple, Optional
 
 
+IdTitles = dict[int, str]
+# class IdTitle(TypedDict):
+#     id: int
+#     title: str
+
+
 class Metadata(NamedTuple):
     src_filename: str
     created_date: datetime
@@ -33,10 +39,6 @@ OutRow = dict[str, typing.Any]
 OutRows = list[OutRow]
 
 
-class OutData(NamedTuple):
-    metadata: Metadata
-    records: OutRows
-
 
 class DbConnectionParameters(TypedDict):
     host: str
@@ -58,8 +60,9 @@ class Location(NamedTuple):
     data: Value
 
 
+class OutData(NamedTuple):
+    metadata: Metadata
+    rows: OutRows
+    op_id_titles: IdTitles
+    loc_objects: dict[bytes, Location.Value]
 
-IdTitle = dict[int, str]
-# class IdTitle(TypedDict):
-#     id: int
-#     title: str

@@ -90,7 +90,7 @@ class NumPlanConverter(AbstractConverter):
 
     def store_locations(self, curr_locations: list[data_types.Location]) -> None:
         for loc in curr_locations:
-            self.locations.setdefault(loc.id, loc.data)
+            self.loc_objects.setdefault(loc.id, loc.data)
 
     # """
     # action для поля выполняет некоторые дополнительные действия, не связанные с заполнением dst_val.

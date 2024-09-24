@@ -23,8 +23,8 @@ class AbstractConverter(object):
     def __init__(self, config: Config) -> None:
         self.config = config
         self.dst_fields_metadata_map: dict[str, DstFieldMetadata] = self.get_dst_fields_metadata()
-        self.op_id_titles: data_types.IdTitle = {}
-        self.locations: dict[bytes, data_types.Location.Value] = {}
+        self.op_id_titles: data_types.IdTitles = {}
+        self.loc_objects: dict[bytes, data_types.Location.Value] = {}
         self.total_loc_indexes: list[bytes] = []
 
     def get_converted_data(self, input_data: data_types.InpData) -> data_types.OutData:
@@ -58,7 +58,8 @@ class AbstractConverter(object):
                     logger.error('В строке %d в файле "%s": %s' % (i, input_data.metadata.src_filename, msg))
                 exit(1)
 
-        res = data_types.OutData(metadata=input_data.metadata, records=out_rows)
+        res = data_types.OutData(metadata=input_data.metadata, rows=out_rows, op_id_titles=self.op_id_titles,
+                                 loc_objects=self.loc_objects)
         return res
 
     @abstractmethod
