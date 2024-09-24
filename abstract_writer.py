@@ -13,22 +13,18 @@ class AbstractWriter(object):
     def __init__(self, global_config: config.Config) -> None:
         logger.debug("%s: preparing parameters...", self.__class__.__name__)
         self.config: config.Config = global_config
-        self.url = Url(self.config.get_param_val(r"./Dst/Url"))
-        self.fieldslist = self.get_fieldslist()
+        self.url = Url(self.config.get_param_val(r"/Dst/Url"))
+        self.fields_list = self.get_fields_list()
 
     @abstractmethod
-    def get_filelist(self) -> typing.Optional[list[str]]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def put_data(self, data2: datatypes.InpData) -> None:
+    def put_data(self, data2: data_types.OutData) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def close(self) -> None:
         raise NotImplementedError
 
-    def get_fieldslist(self) -> list[str]:
+    def get_fields_list(self) -> list[str]:
         res: list[str] = []
         for n in self.config.findall(r"/Converter/DstFields/Field"):
             v = self.config.get_param_val(r"Name", n)

@@ -24,11 +24,11 @@ class FileReader(AbstractReader):
         if self.dir_name == "":
             self.dir_name = r"/"
 
-        logger.info("%s.__init__: File reader path: '%s'..." % (self.__class__.__name__, self.dir_name))
+        logger.info("%s.__init__: File reader path: '%s'" % (self.__class__.__name__, self.dir_name))
 
     @override()
     def get_filelist(self) -> list[str]:
-        logger.info('Получаем список файлов по пути: "%s"...' % (self.url.scheme + r'://' + self.url.path))
+        logger.info('Получаем список файлов по пути: "%s"' % (self.url.scheme + r'://' + self.url.path))
         filelist = []
         os.chdir(self.dir_name)
         for entry in glob.glob(self.basename):
