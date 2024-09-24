@@ -17,9 +17,9 @@ class NumPlanConverter(AbstractConverter):
         # action должна возвращать False, если после action не нужно заполнять поле в dst_row
         self.actions: dict[str, Callable[[str], bool]] = {}
 
-    def convert_row(self, src_row: data_types.InpRecord) -> data_types.OutRecord:
+    def convert_row(self, src_row: data_types.InpRecord) -> data_types.OutRow:
         # {'ABC': '800', 'CAPACITY': '10000', 'FROM': '1000000', 'GAR_REGION': 'Российская Федерация', 'INN': '7707049388', 'OPERATOR': 'ПАО "Ростелеком"', 'REGION': 'Российская Федерация', 'TO': '1009999'}
-        dst_row: data_types.OutRecord = {}
+        dst_row: data_types.OutRow = {}
         for dst_field_name in self.dst_fields_metadata_map.keys():
             src_field_name: str = self.dst_fields_metadata_map[dst_field_name].src_field_name
             src_field_val: str = src_row[src_field_name]
@@ -45,14 +45,13 @@ class NumPlanConverter(AbstractConverter):
         loc_parts: list[str] = full_location.strip().rsplit(sep='|', maxsplit=2)  # [point], [rayon], oblast
         return self._get_parsed_locations_list(loc_parts).curr_locations
 
-    # class LocData(NamedTuple):
-    #     parent_id: Optional[bytes]
-    #     level: int
-    #     title: str
-    #
     # class Location(TypedDict):
+    #     class Value(NamedTuple):
+    #         parent_id: Optional[bytes]
+    #         level: int
+    #         title: str
     #     id: bytes
-    #     data: LocData
+    #     data: Value
 
     # class TT(NamedTuple):
     #     curr_locations: list[data_types.Location]

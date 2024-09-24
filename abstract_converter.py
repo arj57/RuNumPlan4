@@ -36,12 +36,12 @@ class AbstractConverter(object):
         """
         logger.info("Конвертируем...")
         src_records: data_types.InpRecords = input_data.records
-        out_records: data_types.OutRecords = []
+        out_rows: data_types.OutRows = []
 
         for i, src_row in enumerate(src_records, start=1):
             try:
-                out_record: data_types.OutRecord = self.convert_row(src_row)
-                out_records.append(out_record)
+                out_row: data_types.OutRow = self.convert_row(src_row)
+                out_rows.append(out_row)
             except utils.OptionalFieldEmptyException as msg:
                 logger.debug("Игнорируем строку: %d в файле \"%s\":  %s.",
                              i, input_data.metadata.src_filename, msg)
@@ -58,11 +58,11 @@ class AbstractConverter(object):
                     logger.error('В строке %d в файле "%s": %s' % (i, input_data.metadata.src_filename, msg))
                 exit(1)
 
-        res = data_types.OutData(metadata=input_data.metadata, records= out_records)
+        res = data_types.OutData(metadata=input_data.metadata, records=out_rows)
         return res
 
     @abstractmethod
-    def convert_row(self, src_row: data_types.InpRecord) -> data_types.OutRecord:
+    def convert_row(self, src_row: data_types.InpRecord) -> data_types.OutRow:
         pass
 
     def get_dst_fields_metadata(self) -> dict[str, DstFieldMetadata]:

@@ -18,7 +18,7 @@ class InpData(NamedTuple):
     records: InpRecords
 
 
-OutRecord = dict[str, typing.Any]
+OutRow = dict[str, typing.Any]
 # class OutRecord(TypedDict):
 #     abc: int
 #     begin: int
@@ -30,12 +30,12 @@ OutRecord = dict[str, typing.Any]
 #     inn: int
 
 
-OutRecords = list[OutRecord]
+OutRows = list[OutRow]
 
 
 class OutData(NamedTuple):
     metadata: Metadata
-    records: OutRecords
+    records: OutRows
 
 
 class DbConnectionParameters(TypedDict):
