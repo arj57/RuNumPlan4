@@ -8,6 +8,7 @@ import app_logger
 import utils
 from config import Config
 import data_types
+from data_types import Location
 
 logger = app_logger.get_logger(__name__)
 
@@ -24,16 +25,10 @@ class AbstractConverter(object):
         self.config = config
         self.dst_fields_metadata_map: dict[str, DstFieldMetadata] = self.get_dst_fields_metadata()
         self.op_id_titles: data_types.IdTitles = {}
-        self.loc_objects: dict[bytes, data_types.Location.Value] = {}
+        self.loc_objects: dict[bytes, Location] = {}
         self.total_loc_indexes: list[bytes] = []
 
     def get_converted_data(self, input_data: data_types.InpData) -> data_types.OutData:
-        """
-        Формирует данные в виде словаря:
-        'src_filename': str - имя исходного файла из SMG
-        'dst_filename': str - имя результирующего файла
-        'data': datatypes.Records - список CDR, сконвертированный
-        """
         logger.info("Конвертируем...")
         src_records: data_types.InpRecords = input_data.records
         out_rows: data_types.OutRows = []

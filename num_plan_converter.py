@@ -17,7 +17,7 @@ class TT(NamedTuple):
 
 def _get_location_data(full_location: str) -> list[data_types.Location]:
     """
-      Получение списка объектов Location из строки с локейшеном ([[населенный пункт|]район|]область)
+      Получение списка объектов LocValue из строки с локейшеном ([[населенный пункт|]район|]область)
      :parameter full_location - строка с локейшеном
      :return - список объектов Location ( [{id, parent_id, title}, ...] - для каждого распарсенного локейшена)
     """
@@ -25,36 +25,35 @@ def _get_location_data(full_location: str) -> list[data_types.Location]:
     def _get_parsed_locations_list(parsed_locations: list[str],
                                    tmp_data: TT = None) -> TT:
         """
-           Получение списка объектов Location из списка строк с иерархией локейшенов (область, район, населенный пункт). Вспомогательный метод.
+           Получение списка объектов LocValue из списка строк с иерархией локейшенов (область, район, населенный пункт). Вспомогательный метод.
          :parameter parsed_locations - список строк с иерархией локейшенов
          :return - кортеж: список объектов Location ([{id, parent_id, title}, ...] - для каждого распарсенного локейшена), а также joined_names - необходим для рекурс. вызова
          :exception ValueError - if parsed locations list is empty
         """
         if len(parsed_locations) == 0:
             raise ValueError('Parsed locations list is empty')
+
+        partial_name: str = parsed_locations.pop().strip()
+        if tmp_data is None:
+            locations: list[data_types.Location] = []
+            level = 0
+            parent_id = None
+            joined_names = partial_name
         else:
-            partial_name: str = parsed_locations.pop().strip()
-            if tmp_data is None:
-                current_locations: list[data_types.Location] = []
-                level = 0
-                parent_id = None
-                joined_names = partial_name
-            else:
-                current_locations = tmp_data.curr_locations
-                level: int = len(current_locations)
-                parent_id: Optional[bytes] = current_locations[-1].id
-                joined_names = tmp_data.joined_names + '|' + partial_name
+            locations = tmp_data.curr_locations
+            level: int = len(locations)
+            parent_id: Optional[bytes] = locations[-1].id
+            joined_names = tmp_data.joined_names + '|' + partial_name
 
-            loc_key: bytes = _my_hash(joined_names.encode('utf-8'))
-            loc_val = data_types.Location.Value(parent_id=parent_id, level=level, title=partial_name)
-            location = Location(id=loc_key, data=loc_val)
-            current_locations.append(location)
-            tmp_data = TT(curr_locations=current_locations, joined_names=joined_names)
+        loc_key: bytes = _my_hash(joined_names.encode('utf-8'))
+        location = data_types.Location(id=loc_key, parent_id=parent_id, level=level, title=partial_name)
+        locations.append(location)
+        tmp_data = TT(curr_locations=locations, joined_names=joined_names)
 
-            if len(parsed_locations) == 0:
-                return tmp_data
-            else:
-                return _get_parsed_locations_list(parsed_locations, tmp_data)
+        if len(parsed_locations) == 0:
+            return tmp_data
+        else:
+            return _get_parsed_locations_list(parsed_locations, tmp_data)
 
     loc_parts: list[str] = full_location.strip().rsplit(sep='|', maxsplit=2)  # [point], [rayon], oblast
     return _get_parsed_locations_list(loc_parts).curr_locations
@@ -90,7 +89,7 @@ class NumPlanConverter(AbstractConverter):
 
     def store_locations(self, curr_locations: list[data_types.Location]) -> None:
         for loc in curr_locations:
-            self.loc_objects.setdefault(loc.id, loc.data)
+            self.loc_objects.setdefault(loc.id, loc)
 
     # """
     # action для поля выполняет некоторые дополнительные действия, не связанные с заполнением dst_val.
@@ -124,25 +123,6 @@ class NumPlanConverter(AbstractConverter):
     #     else:
     #         return True
 
-
-# if mapper_name is not None:
-#     mapper_function: Callable[[str], typing.Any] = self.mappers[mapper_name]
-#     if mapper_function is not None:
-#         try:
-#             res[dst_field_name] = mapper_function(src_val)
-#         except KeyError:
-#             if len(src_val) == 0:
-#                 res[dst_field_name] = ""
-#                 # raise OptionalFieldEmptyException('Пустое значение "%s" поля "%s".' %
-#                 #                                   (src_val, src_field_name))
-#             else:
-#                 raise KeyError('Неизвестное значение "%s" поля "%s". Не могу преобразовать' %
-#                                (src_val, src_field_name))
-#
-# else:
-#     res[dst_field_name] = src_val
-#
-# return res
 
 class OptionalFieldEmptyException(Exception):
     pass
