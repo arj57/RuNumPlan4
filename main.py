@@ -51,7 +51,7 @@ class RuNumPlan4:
             src_data: InpData = self.src.get_parsed_data(src_filename, skip_header=True)
             converter: AbstractConverter = NumPlanConverter(self.conf)
             dst_data: OutData = converter.get_converted_data(src_data)
-            self.dst.put_data(dst_data)
+            self.dst.store_data(dst_data)
             pass
 
 

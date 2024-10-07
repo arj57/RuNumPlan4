@@ -3,6 +3,12 @@ import typing
 from datetime import datetime
 from typing import TypedDict, NamedTuple, Optional
 
+
+class IdTitle(NamedTuple):
+    id: int
+    title: str
+
+
 IdTitles = dict[int, str]
 
 
@@ -35,18 +41,16 @@ class Location(NamedTuple):
     level: int
     title: str
 
-OutRow = dict[str, typing.Any]
-# class OutRecord(TypedDict):
-#     abc: int
-#     begin: int
-#     end: int
-#     capacity: int
-#     # operator: str
-#     # region: str
-#     reg_gar_id: str
-#     inn: int
+Locations = dict[bytes, Location]
 
+OutRow = dict[str, typing.Any]
 OutRows = list[OutRow]
+
+
+class OutRowAndRef(NamedTuple):
+    row: OutRow
+    op_id_title: IdTitle
+    loc_objects: list[Location]
 
 
 class OutData(NamedTuple):

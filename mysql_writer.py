@@ -16,9 +16,8 @@ logger = app_logger.get_logger(__name__)
 
 
 class MysqlWriter(AbstractWriter):
-    def __init__(self, config: config.Config) -> None:
-        super().__init__(config)
-        # self.fields_types: list[str] = self._get_fields_types()
+    def __init__(self, conf: config.Config) -> None:
+        super().__init__(conf)
 
         conn_params = self._get_connection_parameters()
         logger.info('Connecting to host %s DB "%s"...' % (conn_params['host'], conn_params['database']))
@@ -45,58 +44,74 @@ class MysqlWriter(AbstractWriter):
         self.conn = None
         logger.info('Connection to DB closed.')
 
-    def __commit(self):
+    def _commit(self):
         self.conn.commit()
         logger.info('Commited.')
 
-    def __rollback(self):
+    def _rollback(self):
         self.conn.rollback()
         logger.info("Rollback.")
 
     @override()
-    def put_data(self, data: data_types.OutData) -> None:
-        self.put_rows(data.rows)
+    def store_data(self, data: data_types.OutData) -> None:
+        self.store_rows(data.rows)
+        self.store_loc_ref(data.loc_objects)
+        self.store_op_ref(data.op_id_titles)
+        self.store_metadata()
 
-    def put_rows(self, rows: data_types.OutRows) -> None:
+        if bool(self.config.get_param_val("./DryRun")):
+            logger.info("Dry run, not commited")
+        else:
+            # meta.set_last_row_id()
+            # meta.save()
+            self._commit()
+
+    def store_rows(self, rows: data_types.OutRows) -> None:
         cursor = self.conn.cursor()
         fields_list: list[str] = self.get_fields_list()
-
-        # meta = MysqlMetadata(data2, self.conn)
         try:
             ins_query = " INSERT INTO op_data (" + ",".join(fields_list) + ") VALUES(" + (
                     "%s," * len(fields_list)).strip(",") + ")"
 
-            cursor.executemany(ins_query, self.__dicts_to_tuples(rows))
-            if bool(self.config.get_param_val("./DryRun")):
-                logger.info("Dry run, not commited")
-            else:
-                # meta.set_last_row_id()
-                # meta.save()
-                self.__commit()
-
+            vals = [tuple(row.values()) for row in rows]
+            cursor.executemany(ins_query, vals)
         except mysql.connector.Error as er:
             logger.error('Fail to insert CDRs: %s' % er)
-            self.__rollback()
+            self._rollback()
             raise IOError
         finally:
             cursor.close()
 
-    # def _get_fields_types(self) -> list[str]:
-    #     trusted_types = ["int", "datetime"]  # others as needed
-    #
-    #     res: list[str] = []
-    #     for n in self.config.findall(r"/Converter/DstFields/Field"):
-    #         t = self.config.get_param_val(r"Type", n)
-    #         if (t is None) or (t not in trusted_types):
-    #             t = "str"
-    #         # t = locate(v)
-    #         res.append(t)
-    #     return res
+    def store_loc_ref(self, rows: data_types.Locations):
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("TRUNCATE locations_ref")
+            ins_query = "INSERT INTO locations_ref (id, parent_id, level, title) VALUES( %s, %s, %s, %s)"
+            vals = list(rows.values())
+            cursor.executemany(ins_query, vals)
+        except mysql.connector.Error as er:
+            logger.error('Fail to insert loc_ref: %s' % er)
+            self._rollback()
+            raise IOError
+        finally:
+            cursor.close()
 
-    def __dicts_to_tuples(self, rows: data_types.OutRows) -> list[tuple]:
-        r2 = list(map(lambda x: tuple(x.values()), rows))
-        return r2
+    def store_op_ref(self, rows: data_types.IdTitles):
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("TRUNCATE operators_ref")
+            ins_query = "INSERT INTO operators_ref (inn, title) VALUES( %s, %s)"
+            vals = list(rows.items())
+            cursor.executemany(ins_query, vals)
+        except mysql.connector.Error as er:
+            logger.error('Fail to insert loc_ref: %s' % er)
+            self._rollback()
+            raise IOError
+        finally:
+            cursor.close()
 
+    def store_metadata(self):
+        pass
 
 # class MysqlMetadata(AbstractMetadata):
 #     def __init__(self, data: data_types.InpData, connection: mysql.connector.MySQLConnection):
@@ -141,9 +156,9 @@ class MysqlWriter(AbstractWriter):
 #         finally:
 #             cur2.close()
 
-    # @override()
-    # def get_metadata(self) -> data_types.TMetadata:
-    #     res = super().get_metadata()
-    #     res['start_id'] = self.first_record_id
-    #     res['end_id'] = self.last_record_id
-    #     return res
+# @override()
+# def get_metadata(self) -> data_types.TMetadata:
+#     res = super().get_metadata()
+#     res['start_id'] = self.first_record_id
+#     res['end_id'] = self.last_record_id
+#     return res

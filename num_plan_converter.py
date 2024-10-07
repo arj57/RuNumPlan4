@@ -1,14 +1,15 @@
 import hashlib
+import typing
 from typing import Callable, Optional, NamedTuple
 
 import data_types
 from abstract_converter import AbstractConverter
 from config import Config
-from data_types import Location
+from data_types import Location, OutRowAndRef
 
 
 def _my_hash(_string: bytes) -> bytes:
-    return hashlib.md5(_string).digest()
+    return hashlib.md5(_string, usedforsecurity=False).digest()
 
 class TT(NamedTuple):
     curr_locations: list[Location]
@@ -65,31 +66,37 @@ class NumPlanConverter(AbstractConverter):
         # action должна возвращать False, если после action не нужно заполнять поле в dst_row
         self.actions: dict[str, Callable[[str], bool]] = {}
 
-    def convert_row(self, src_row: data_types.InpRecord) -> data_types.OutRow:
+    def convert_row(self, src_row: data_types.InpRecord) -> data_types.OutRowAndRef:
         # {'ABC': '800', 'CAPACITY': '10000', 'FROM': '1000000', 'GAR_REGION': 'Российская Федерация', 'INN': '7707049388', 'OPERATOR': 'ПАО "Ростелеком"', 'REGION': 'Российская Федерация', 'TO': '1009999'}
-        dst_row: data_types.OutRow = {}
+        tmp_row: dict[str, typing.Any] = {}
+        op_id_title = None
+        curr_loc_objects: list[data_types.Location] = []
+
         for dst_field_name in self.dst_fields_metadata_map.keys():
             src_field_name: str = self.dst_fields_metadata_map[dst_field_name].src_field_name
             src_field_val: str = src_row[src_field_name]
 
             if dst_field_name == 'op_inn':
-                dst_row[dst_field_name] = int(src_field_val)
-                self.store_operator_id_title(int(dst_row[dst_field_name]), src_row['Operator'])
+                tmp_row[dst_field_name] = int(src_field_val)
+                op_id_title = data_types.IdTitle(id=int(tmp_row[dst_field_name]), title=src_row['Operator'])
+                # TODO: store op_id_title and location objects in AbstractConverter
+                # self.store_operator_id_title(int(tmp_row[dst_field_name]), src_row['Operator'])
             elif dst_field_name == 'loc_id':
                 curr_loc_objects: list[data_types.Location] = _get_location_data(src_field_val)
-                dst_row[dst_field_name] = curr_loc_objects[-1].id
-                self.store_locations(curr_loc_objects)
+                tmp_row[dst_field_name] = curr_loc_objects[-1].id
+                # self.store_locations(curr_loc_objects)
             else:
-                dst_row[dst_field_name] = self.typecast_field(src_field_val, dst_field_name)
+                tmp_row[dst_field_name] = self.typecast_field(src_field_val, dst_field_name)
 
-        return dst_row
+        out_row = OutRowAndRef(row=tmp_row, op_id_title=op_id_title, loc_objects=curr_loc_objects)
+        return out_row
 
-    def store_operator_id_title(self, op_id: int, title: str) -> None:
-        self.op_id_titles.setdefault(op_id, title)
+    # def store_operator_id_title(self, op_id: int, title: str) -> None:
+    #     self.op_id_titles.setdefault(op_id, title)
 
-    def store_locations(self, curr_locations: list[data_types.Location]) -> None:
-        for loc in curr_locations:
-            self.loc_objects.setdefault(loc.id, loc)
+    # def store_locations(self, curr_locations: list[data_types.Location]) -> None:
+    #     for loc in curr_locations:
+    #         self.loc_objects.setdefault(loc.id, loc)
 
     # """
     # action для поля выполняет некоторые дополнительные действия, не связанные с заполнением dst_val.

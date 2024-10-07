@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import typing
 import config
 import data_types
 from url import Url
@@ -17,7 +16,7 @@ class AbstractWriter(object):
         self.fields_list = self.get_fields_list()
 
     @abstractmethod
-    def put_data(self, data: data_types.OutData) -> None:
+    def store_data(self, data: data_types.OutData) -> None:
         raise NotImplementedError
 
     @abstractmethod
