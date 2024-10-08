@@ -20,7 +20,7 @@ class AbstractReader(object):
         self.config: config.Config = global_config
         self.src_fields: tuple[str, ...] = self.get_src_fields()
         self.url = Url(self.config.get_param_val(r'./Src/Url'))
-        self.input_dir = global_config.get_param_val(r'InputDataDir')
+        self.tmp_inp_dir = global_config.get_param_val(r'InputDataDir')
 
         logger.info("Src Url: %s" % self.url)
 
@@ -29,12 +29,16 @@ class AbstractReader(object):
         pass
 
     @abstractmethod
-    def download_data_to_tmp(self, filename: str) -> Metadata:
+    def copy_data_to_tmp(self, filename: str) -> None:
+        pass
+
+    @abstractmethod
+    def get_metadata(self, filename: str) -> Metadata:
         pass
 
     def get_parsed_data(self, filename: str, skip_header: bool=False) -> data_types.InpData:
-        file_metadata: Metadata = self.download_data_to_tmp(filename)
-        os.chdir(self.input_dir)
+        self.copy_data_to_tmp(filename)
+        os.chdir(self.tmp_inp_dir)
         with open(filename, 'r') as fin:
             logger.info("Читаем данные из файла '%s'..." % filename)
             cdr_list = fin.readlines()
@@ -44,6 +48,7 @@ class AbstractReader(object):
         if skip_header:
             next(inp, None)  # skip header
         records: data_types.InpRecords = list(inp)
+        file_metadata: Metadata = self.get_metadata(filename)
         return data_types.InpData(metadata=file_metadata, records=records)
 
     @abstractmethod
