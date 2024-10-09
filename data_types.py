@@ -23,7 +23,7 @@ InpRecords = list[InpRecord]
 
 
 class InpData(NamedTuple):
-    metadata: Metadata
+    metadata: list[Metadata]
     records: InpRecords
 
 
@@ -54,7 +54,7 @@ class OutRowAndRef(NamedTuple):
 
 
 class OutData(NamedTuple):
-    metadata: Metadata
+    metadata: list[Metadata]
     rows: OutRows
     op_id_titles: IdTitles
     loc_objects: dict[bytes, Location]

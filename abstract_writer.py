@@ -20,6 +20,9 @@ class AbstractWriter(object):
         raise NotImplementedError
 
     @abstractmethod
+    def _commit(self):
+        pass
+    @abstractmethod
     def close(self) -> None:
         raise NotImplementedError
 

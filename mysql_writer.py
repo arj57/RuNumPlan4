@@ -40,6 +40,7 @@ class MysqlWriter(AbstractWriter):
         self.conn = None
         logger.info('Connection to DB closed.')
 
+    @override()
     def _commit(self):
         self.conn.commit()
         logger.info('Commited.')
@@ -61,6 +62,7 @@ class MysqlWriter(AbstractWriter):
             self._commit()
 
     def store_rows(self, rows: data_types.OutRows) -> None:
+        logger.info("Storing rows...")
         cursor = self.conn.cursor()
         fields_list: list[str] = self.get_fields_list()
         try:
@@ -78,6 +80,7 @@ class MysqlWriter(AbstractWriter):
             cursor.close()
 
     def store_loc_ref(self, rows: data_types.Locations):
+        logger.info("Storing locations references...")
         cursor = self.conn.cursor()
         try:
             cursor.execute("TRUNCATE locations_ref")
@@ -92,6 +95,7 @@ class MysqlWriter(AbstractWriter):
             cursor.close()
 
     def store_op_ref(self, rows: data_types.IdTitles):
+        logger.info("Storing operators references...")
         cursor = self.conn.cursor()
         try:
             cursor.execute("TRUNCATE operators_ref")
@@ -105,11 +109,12 @@ class MysqlWriter(AbstractWriter):
         finally:
             cursor.close()
 
-    def store_metadata(self, meta: data_types.Metadata):
+    def store_metadata(self, meta: list[data_types.Metadata]):
+        logger.info("Storing metadata...")
         cursor = self.conn.cursor()
         try:
             ins_query = "INSERT INTO metadata (filename, dt_created) VALUES( %s, %s)"
-            cursor.execute(ins_query, meta)
+            cursor.executemany(ins_query, meta)
         except mysql.connector.Error as er:
             logger.error('Fail to insert loc_ref: %s' % er)
             self._rollback()

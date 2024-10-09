@@ -36,24 +36,31 @@ class AbstractReader(object):
     def get_metadata(self, filename: str) -> Metadata:
         pass
 
-    def get_parsed_data(self, filename: str, skip_header: bool=False) -> data_types.InpData:
-        self.copy_data_to_tmp(filename)
+    def get_parsed_data(self, skip_header: bool=True) -> data_types.InpData:
+        records: data_types.InpRecords = []
+        files_metadata: list[Metadata] = []
+
+        for filename in self.get_filelist():
+            self.copy_data_to_tmp(filename)
+
         os.chdir(self.tmp_inp_dir)
-        with open(filename, 'r') as fin:
-            logger.info("Читаем данные из файла '%s'..." % filename)
-            cdr_list = fin.readlines()
         csv_extra_parameters = self.get_csv_extra_parameters()
-        csv.register_dialect('custom-dialect', ** csv_extra_parameters)
-        inp: Iterator = csv.DictReader(cdr_list, fieldnames=self.src_fields, dialect='custom-dialect')
-        if skip_header:
-            next(inp, None)  # skip header
-        records: data_types.InpRecords = list(inp)
-        file_metadata: Metadata = self.get_metadata(filename)
-        return data_types.InpData(metadata=file_metadata, records=records)
+        csv.register_dialect('custom-dialect', **csv_extra_parameters)
+        for i, filename in enumerate(self.get_filelist()):
+            with open(filename, 'r') as fin:
+                logger.info("Читаем данные из файла '%s'..." % filename)
+                cdr_list = fin.readlines()
+            inp: Iterator = csv.DictReader(cdr_list, fieldnames=self.src_fields, dialect='custom-dialect')
+            if skip_header or (i > 0):
+                next(inp, None)  # skip header
+            records += list(inp)
+            files_metadata.append(self.get_metadata(filename))
+
+        return data_types.InpData(metadata=files_metadata, records=records)
 
     @abstractmethod
     def close(self) -> None:
-        pass
+        raise NotImplementedError
 
     def get_src_fields(self) -> tuple[str, ...]:
         res = []

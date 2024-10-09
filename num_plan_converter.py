@@ -63,8 +63,7 @@ def _get_location_data(full_location: str) -> list[data_types.Location]:
 class NumPlanConverter(AbstractConverter):
     def __init__(self, config: Config) -> None:
         super().__init__(config)
-        # action должна возвращать False, если после action не нужно заполнять поле в dst_row
-        self.actions: dict[str, Callable[[str], bool]] = {}
+        # self.actions: dict[str, Callable[[str], bool]] = {}
 
     def convert_row(self, src_row: data_types.InpRecord) -> data_types.OutRowAndRef:
         # {'ABC': '800', 'CAPACITY': '10000', 'FROM': '1000000', 'GAR_REGION': 'Российская Федерация', 'INN': '7707049388', 'OPERATOR': 'ПАО "Ростелеком"', 'REGION': 'Российская Федерация', 'TO': '1009999'}

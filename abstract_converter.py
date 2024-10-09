@@ -38,22 +38,23 @@ class AbstractConverter(object):
                 out_rows.append(out_row_and_ref.row)
                 self.store_op_id_title(out_row_and_ref.op_id_title.id, out_row_and_ref.op_id_title.title)
                 self.store_locations(out_row_and_ref.loc_objects)
-            except utils.OptionalFieldEmptyException as msg:
-                logger.debug("Игнорируем строку: %d в файле \"%s\":  %s.",
-                             i, input_data.metadata.src_filename, msg)
-                continue
-            except ValueError as msg:
-                logger.debug("Игнорируем строку : %d в файле \"%s\":  %s.",
-                               i, input_data.metadata.src_filename, msg)
+                if i % 10000 == 0:
+                    print('.', sep='', end='', flush=True)
+            except ValueError or utils.OptionalFieldEmptyException as msg:
+                print('')
+                logger.debug("Игнорируем строку %s:  %s.", src_row, msg)
                 continue
             except KeyError as msg:
                 if self.config.get_param_val(r"/Converter/OnKeyErrorAction") == 'WARNING':
-                    logger.warning('В строке %d в файле "%s": %s' % (i, input_data.metadata.src_filename, msg))
+                    print('')
+                    logger.warning('В строке %s: %s' % (src_row, msg))
                     continue
                 else:
-                    logger.error('В строке %d в файле "%s": %s' % (i, input_data.metadata.src_filename, msg))
+                    print('')
+                    logger.error('В строке %s: %s' % (src_row, msg))
                 exit(1)
 
+        print('')
         res = data_types.OutData(metadata=input_data.metadata, rows=out_rows, op_id_titles=self.op_id_titles,
                                  loc_objects=self.loc_objects)
         return res

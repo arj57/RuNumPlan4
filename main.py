@@ -19,7 +19,6 @@ class RuNumPlan4:
         self.conf = Config()
         self.dst: AbstractWriter = self.writer_factory(self.conf)
         self.src: AbstractReader = self.reader_factory(self.conf)
-        self.filenames_to_process: list[str] = self.src.get_filelist()
 
     @staticmethod
     def reader_factory(config: Config) -> AbstractReader:
@@ -46,13 +45,13 @@ class RuNumPlan4:
         return writer_class(config)
 
     def process(self) -> None:
-        for src_filename in self.filenames_to_process:
-            # TODO: check if data is fresh
-            src_data: InpData = self.src.get_parsed_data(src_filename, skip_header=True)
-            converter: AbstractConverter = NumPlanConverter(self.conf)
-            dst_data: OutData = converter.get_converted_data(src_data)
-            self.dst.store_data(dst_data)
-            pass
+        # TODO: check if data is fresh
+        src_data: InpData = self.src.get_parsed_data(skip_header=True)
+        converter: AbstractConverter = NumPlanConverter(self.conf)
+        dst_data: OutData = converter.get_converted_data(src_data)
+        self.dst.store_data(dst_data)
+        self.dst.close()
+        self.src.close()
 
 
 if __name__ == '__main__':
