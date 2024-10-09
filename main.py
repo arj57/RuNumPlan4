@@ -22,7 +22,7 @@ class RuNumPlan4:
 
     @staticmethod
     def reader_factory(config: Config) -> AbstractReader:
-        src_url_scheme: str = Url(config.get_param_val(r"/Src/Url")).scheme
+        src_url_scheme: str = Url(config.get_param_val(r"Src/Url")).scheme
         mod_name = src_url_scheme + '_reader'
         class_name = src_url_scheme.capitalize() + 'Reader'
         mod = importlib.import_module(mod_name)
@@ -34,7 +34,7 @@ class RuNumPlan4:
 
     @staticmethod
     def writer_factory(config: Config) -> AbstractWriter:
-        dst_url_scheme: str = Url(config.get_param_val(r"/Dst/Url")).scheme
+        dst_url_scheme: str = Url(config.get_param_val(r"Dst/Url")).scheme
         mod_name = dst_url_scheme + '_writer'
         class_name = dst_url_scheme.capitalize() + 'Writer'
         mod = importlib.import_module(mod_name)

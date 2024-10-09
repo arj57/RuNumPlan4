@@ -12,7 +12,7 @@ class AbstractWriter(object):
     def __init__(self, global_config: config.Config) -> None:
         logger.debug("%s: preparing parameters...", self.__class__.__name__)
         self.config: config.Config = global_config
-        self.url = Url(self.config.get_param_val(r"/Dst/Url"))
+        self.url = Url(self.config.get_param_val(r"Dst/Url"))
         self.fields_list = self.get_fields_list()
 
     @abstractmethod
@@ -28,14 +28,14 @@ class AbstractWriter(object):
 
     def get_fields_list(self) -> list[str]:
         res: list[str] = []
-        for n in self.config.findall(r"/Converter/DstFields/Field"):
+        for n in self.config.findall(r"Converter/DstFields/Field"):
             v = self.config.get_param_val(r"Name", n)
             res.append(v)
         return res
 
     def get_csv_extra_parameters(self) -> dict[str,str]:
         res: dict[str, str] = {}
-        for n in self.config.findall(r"/Dst/CsvExtraParameters/*"):
+        for n in self.config.findall(r"Dst/CsvExtraParameters/*"):
             k = n.tag
             v = self.config.get_param_val(r".", n)
             res[k] = v

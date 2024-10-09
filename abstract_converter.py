@@ -45,7 +45,7 @@ class AbstractConverter(object):
                 logger.debug("Игнорируем строку %s:  %s.", src_row, msg)
                 continue
             except KeyError as msg:
-                if self.config.get_param_val(r"/Converter/OnKeyErrorAction") == 'WARNING':
+                if self.config.get_param_val(r"Converter/OnKeyErrorAction") == 'WARNING':
                     print('')
                     logger.warning('В строке %s: %s' % (src_row, msg))
                     continue
@@ -72,7 +72,7 @@ class AbstractConverter(object):
 
     def get_dst_fields_metadata(self) -> dict[str, DstFieldMetadata]:
         res: dict[str, DstFieldMetadata] = {}
-        for dst_field_node in self.config.findall(r"/Converter/DstFields/"):
+        for dst_field_node in self.config.findall(r"Converter/DstFields/"):
             dst_field_name = self.config.find(r'Name', dst_field_node).text
             src_field_name = self.config.find(r'Source', dst_field_node).text
             action_name: typing.Optional[str] = self.get_action_name(dst_field_node)
