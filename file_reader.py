@@ -1,12 +1,15 @@
-import glob
-import os.path
-import shutil
-from datetime import datetime, timezone
-
+from abstract_reader import AbstractReader
 import app_logger
 import config
+import csv
+import data_types
+import os.path
+import shutil
+from collections.abc import Iterator
+from datetime import datetime, timezone
+from wcmatch import glob
+from wcmatch.fnmatch import BRACE
 from overrides import override
-from abstract_reader import AbstractReader
 from data_types import Metadata
 
 logger = app_logger.get_logger(__name__)
@@ -28,12 +31,37 @@ class FileReader(AbstractReader):
 
     @override()
     def get_filelist(self) -> list[str]:
-        logger.info('Получаем список файлов по пути: "%s"' % (self.url.scheme + r'://' + self.url.path))
+        # logger.info('Получаем список файлов по пути: "%s"' % (self.url.scheme + r'://' + self.url.path))
         filelist = []
         os.chdir(self.dir_name)
-        for entry in glob.glob(self.basename):
+        for entry in glob.glob(self.basename, flags=BRACE):
             filelist.append(entry)
         return filelist
+
+    @override()
+    def get_parsed_data(self, skip_header: bool=True) -> data_types.InpData:
+        records: data_types.InpRecords = []
+        files_metadata: list[data_types.Metadata] = []
+
+        for filename in self.get_filelist():
+            self.copy_data_to_tmp(filename)
+
+        os.chdir(self.tmp_inp_dir)
+        csv_extra_parameters = self.get_csv_extra_parameters()
+        csv.register_dialect('custom-dialect', **csv_extra_parameters)
+        for i, filename in enumerate(self.get_filelist()):
+            with open(filename, 'r') as fin:
+                logger.info("Читаем данные из файла '%s'..." % filename)
+                cdr_list = fin.readlines()
+            inp: Iterator = csv.DictReader(cdr_list, fieldnames=self.src_fields, dialect='custom-dialect')
+            if skip_header or (i > 0):
+                next(inp, None)  # skip header
+            records += list(inp)
+            files_metadata.append(self.get_metadata(filename))
+
+        return data_types.InpData(metadata=files_metadata, records=records)
+
+
 
     @override()
     def copy_data_to_tmp(self, filename: str) -> None:

@@ -1,12 +1,5 @@
-import csv
 import logging
-import os
-from collections.abc import Iterator
-from datetime import datetime, timezone
-from typing import Optional
-
 import data_types
-from data_types import Metadata
 from url import Url
 from abc import abstractmethod
 import config
@@ -26,37 +19,19 @@ class AbstractReader(object):
 
     @abstractmethod
     def get_filelist(self) -> list[str]:
-        pass
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_parsed_data(self, skip_header: bool=True) -> data_types.InpData:
+        raise NotImplementedError
 
     @abstractmethod
     def copy_data_to_tmp(self, filename: str) -> None:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
-    def get_metadata(self, filename: str) -> Metadata:
-        pass
-
-    def get_parsed_data(self, skip_header: bool=True) -> data_types.InpData:
-        records: data_types.InpRecords = []
-        files_metadata: list[Metadata] = []
-
-        for filename in self.get_filelist():
-            self.copy_data_to_tmp(filename)
-
-        os.chdir(self.tmp_inp_dir)
-        csv_extra_parameters = self.get_csv_extra_parameters()
-        csv.register_dialect('custom-dialect', **csv_extra_parameters)
-        for i, filename in enumerate(self.get_filelist()):
-            with open(filename, 'r') as fin:
-                logger.info("Читаем данные из файла '%s'..." % filename)
-                cdr_list = fin.readlines()
-            inp: Iterator = csv.DictReader(cdr_list, fieldnames=self.src_fields, dialect='custom-dialect')
-            if skip_header or (i > 0):
-                next(inp, None)  # skip header
-            records += list(inp)
-            files_metadata.append(self.get_metadata(filename))
-
-        return data_types.InpData(metadata=files_metadata, records=records)
+    def get_metadata(self, filename: str) -> data_types.Metadata:
+        raise NotImplementedError
 
     @abstractmethod
     def close(self) -> None:
