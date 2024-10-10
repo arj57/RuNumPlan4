@@ -18,10 +18,6 @@ class AbstractReader(object):
         logger.info("Src Url: %s" % self.url)
 
     @abstractmethod
-    def get_filelist(self) -> list[str]:
-        raise NotImplementedError
-
-    @abstractmethod
     def get_parsed_data(self, skip_header: bool=True) -> data_types.InpData:
         raise NotImplementedError
 

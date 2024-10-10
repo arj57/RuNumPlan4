@@ -20,6 +20,7 @@ class FileReader(AbstractReader):
         super().__init__(global_config)
         self.basename = os.path.basename(self.url.path)
         self.dir_name = os.path.abspath(os.path.dirname(self.url.path))
+        self.sources_list: list[str] = self.get_files_list()
 
         if not self.tmp_inp_dir.startswith('/'):
             self.tmp_inp_dir = os.path.join(os.path.dirname(__file__), 'InputData')
@@ -29,13 +30,10 @@ class FileReader(AbstractReader):
 
         logger.info("%s.__init__: File reader path: '%s'" % (self.__class__.__name__, self.dir_name))
 
-    @override()
-    def get_filelist(self) -> list[str]:
-        # logger.info('Получаем список файлов по пути: "%s"' % (self.url.scheme + r'://' + self.url.path))
-        filelist = []
+    # @override()
+    def get_files_list(self) -> list[str]:
         os.chdir(self.dir_name)
-        for entry in glob.glob(self.basename, flags=BRACE):
-            filelist.append(entry)
+        filelist = [entry for entry in glob.glob(self.basename, flags=BRACE)]
         return filelist
 
     @override()
@@ -43,13 +41,13 @@ class FileReader(AbstractReader):
         records: data_types.InpRecords = []
         files_metadata: list[data_types.Metadata] = []
 
-        for filename in self.get_filelist():
+        for filename in self.sources_list:
             self.copy_data_to_tmp(filename)
 
         os.chdir(self.tmp_inp_dir)
         csv_extra_parameters = self.get_csv_extra_parameters()
         csv.register_dialect('custom-dialect', **csv_extra_parameters)
-        for i, filename in enumerate(self.get_filelist()):
+        for i, filename in enumerate(self.sources_list):
             with open(filename, 'r') as fin:
                 logger.info("Читаем данные из файла '%s'..." % filename)
                 cdr_list = fin.readlines()
