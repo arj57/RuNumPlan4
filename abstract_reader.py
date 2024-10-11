@@ -26,10 +26,6 @@ class AbstractReader(object):
         raise NotImplementedError
 
     @abstractmethod
-    def get_metadata(self, filename: str) -> data_types.Metadata:
-        raise NotImplementedError
-
-    @abstractmethod
     def close(self) -> None:
         raise NotImplementedError
 

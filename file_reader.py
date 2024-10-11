@@ -47,7 +47,7 @@ class FileReader(AbstractReader):
         rec_iter: Iterator = csv.DictReader(lines, fieldnames=self.src_fields, dialect='custom-dialect')
         if skip_header:
             next(rec_iter, None)  # skip header
-        metadata: list[data_types.Metadata] = [self.get_metadata(src_abs_path)]
+        metadata: list[data_types.Metadata] = [self._get_metadata(src_abs_path)]
 
         return data_types.InpData(metadata=metadata, records=list(rec_iter))
 
@@ -55,13 +55,11 @@ class FileReader(AbstractReader):
     def copy_data_to_tmp(self) -> None:
         pass
 
-    def get_metadata(self, src_abs_path: str) -> Metadata:
-        d = datetime.fromtimestamp(os.path.getmtime(src_abs_path), tz=timezone.utc)
-        md = Metadata(src_filename=src_abs_path, created_date=d)
-        return md
+    def _get_metadata(self, src_abs_path: str) -> Metadata:
+        dt_modified = datetime.fromtimestamp(os.path.getmtime(src_abs_path), tz=timezone.utc)
+        file_len: int = os.path.getsize(src_abs_path)
+        return Metadata(src_url=self.url.scheme + "://" + src_abs_path, created_date=dt_modified, len=file_len)
 
     @override()
     def close(self) -> None:
         pass
-
-

@@ -13,8 +13,9 @@ IdTitles = dict[int, str]
 
 
 class Metadata(NamedTuple):
-    src_filename: str
-    created_date: datetime
+    src_url: str
+    len: Optional[int]
+    created_date: Optional[datetime]
 
 
 # Only type = str for csv

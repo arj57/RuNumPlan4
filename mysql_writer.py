@@ -113,7 +113,7 @@ class MysqlWriter(AbstractWriter):
         logger.info("Storing metadata...")
         cursor = self.conn.cursor()
         try:
-            ins_query = "INSERT INTO metadata (filename, dt_created) VALUES( %s, %s)"
+            ins_query = "INSERT INTO metadata (filename, length, dt_created) VALUES( %s, %s, %s)"
             cursor.executemany(ins_query, meta)
         except mysql.connector.Error as er:
             logger.error('Fail to insert loc_ref: %s' % er)
