@@ -7,71 +7,57 @@ import os.path
 import shutil
 from collections.abc import Iterator
 from datetime import datetime, timezone
-from wcmatch import glob
-from wcmatch.fnmatch import BRACE
 from overrides import override
 from data_types import Metadata
+from url import Url
 
 logger = app_logger.get_logger(__name__)
 
 
+def get_abs_path(filename: str) -> str:
+    if os.path.isabs(filename):
+        abs_path = filename
+    else:
+        wd = os.path.abspath(os.path.curdir)
+        src_basename = os.path.basename(filename)
+        src_dirname =  os.path.dirname(filename)
+        os.chdir(src_dirname)
+        abs_path = os.path.abspath(src_basename)
+        os.chdir(wd)
+    return abs_path
+
+
 class FileReader(AbstractReader):
-    def __init__(self, global_config: config.Config):
-        super().__init__(global_config)
-        self.basename = os.path.basename(self.url.path)
-        self.dir_name = os.path.abspath(os.path.dirname(self.url.path))
-        self.sources_list: list[str] = self.get_files_list()
+    def __init__(self, global_config: config.Config, src_url: Url):
+        super().__init__(global_config, src_url)
 
         if not self.tmp_inp_dir.startswith('/'):
             self.tmp_inp_dir = os.path.join(os.path.dirname(__file__), 'InputData')
 
-        if self.dir_name == "":
-            self.dir_name = r"/"
-
-        logger.info("%s.__init__: File reader path: '%s'" % (self.__class__.__name__, self.dir_name))
-
-    # @override()
-    def get_files_list(self) -> list[str]:
-        os.chdir(self.dir_name)
-        filelist = [entry for entry in glob.glob(self.basename, flags=BRACE)]
-        return filelist
-
     @override()
     def get_parsed_data(self, skip_header: bool=True) -> data_types.InpData:
-        records: data_types.InpRecords = []
-        files_metadata: list[data_types.Metadata] = []
-
-        for filename in self.sources_list:
-            self.copy_data_to_tmp(filename)
-
-        os.chdir(self.tmp_inp_dir)
+        # self.copy_data_to_tmp()
         csv_extra_parameters = self.get_csv_extra_parameters()
         csv.register_dialect('custom-dialect', **csv_extra_parameters)
-        for i, filename in enumerate(self.sources_list):
-            with open(filename, 'r') as fin:
-                logger.info("Читаем данные из файла '%s'..." % filename)
-                cdr_list = fin.readlines()
-            inp: Iterator = csv.DictReader(cdr_list, fieldnames=self.src_fields, dialect='custom-dialect')
-            if skip_header or (i > 0):
-                next(inp, None)  # skip header
-            records += list(inp)
-            files_metadata.append(self.get_metadata(filename))
 
-        return data_types.InpData(metadata=files_metadata, records=records)
+        src_abs_path = get_abs_path(self.url.path)  # self.url.path may be also relative
+        with open(src_abs_path, 'r') as fin:
+            logger.info("Читаем данные из файла '%s'..." % src_abs_path)
+            lines = fin.readlines()
+        rec_iter: Iterator = csv.DictReader(lines, fieldnames=self.src_fields, dialect='custom-dialect')
+        if skip_header:
+            next(rec_iter, None)  # skip header
+        metadata: list[data_types.Metadata] = [self.get_metadata(src_abs_path)]
 
-
+        return data_types.InpData(metadata=metadata, records=list(rec_iter))
 
     @override()
-    def copy_data_to_tmp(self, filename: str) -> None:
-        # TODO: check permissions
-        src_abs_path = os.path.abspath(os.path.basename(filename))
-        dst_dir = os.path.abspath(self.tmp_inp_dir)
-        shutil.copy2(src_abs_path, dst_dir)  # with creation time
+    def copy_data_to_tmp(self) -> None:
+        pass
 
-    def get_metadata(self, filename: str) -> Metadata:
-        src_abs_path = os.path.abspath(os.path.basename(filename))
+    def get_metadata(self, src_abs_path: str) -> Metadata:
         d = datetime.fromtimestamp(os.path.getmtime(src_abs_path), tz=timezone.utc)
-        md = Metadata(src_filename=os.path.basename(filename), created_date=d)
+        md = Metadata(src_filename=src_abs_path, created_date=d)
         return md
 
     @override()

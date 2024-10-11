@@ -26,4 +26,5 @@ class Url(object):
         self.password = u.password
         self.hostname = u.hostname
         self.port = u.port
+        self.string = urlparse.unquote(url2)
 

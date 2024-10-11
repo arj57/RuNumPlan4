@@ -1,4 +1,5 @@
 import app_logger
+import data_types
 from abstract_converter import AbstractConverter
 from config import Config
 import importlib
@@ -17,12 +18,10 @@ logger = app_logger.get_logger(__name__)
 class RuNumPlan4:
     def __init__(self):
         self.conf = Config()
-        self.dst: AbstractWriter = self.writer_factory(self.conf)
-        self.src: AbstractReader = self.reader_factory(self.conf)
 
     @staticmethod
-    def reader_factory(config: Config) -> AbstractReader:
-        src_url_scheme: str = Url(config.get_param_val(r"Src/Url")).scheme
+    def reader_factory(config: Config, src_url: Url) -> AbstractReader:
+        src_url_scheme: str = src_url.scheme
         mod_name = src_url_scheme + '_reader'
         class_name = src_url_scheme.capitalize() + 'Reader'
         mod = importlib.import_module(mod_name)
@@ -30,7 +29,7 @@ class RuNumPlan4:
             reader_class = dict(inspect.getmembers(mod, inspect.isclass))[class_name]
         except IndexError:
             raise AttributeError('Не найден класс "%s"' % class_name)
-        return reader_class(config)
+        return reader_class(config, src_url)
 
     @staticmethod
     def writer_factory(config: Config) -> AbstractWriter:
@@ -46,12 +45,25 @@ class RuNumPlan4:
 
     def process(self) -> None:
         # TODO: check if data is fresh
-        src_data: InpData = self.src.get_parsed_data(skip_header=True)
+        src_data: InpData = self.get_accumulated_inp_data(skip_header=True)
         converter: AbstractConverter = NumPlanConverter(self.conf)
         dst_data: OutData = converter.get_converted_data(src_data)
-        self.dst.store_data(dst_data)
-        self.dst.close()
-        self.src.close()
+        dst: AbstractWriter = self.writer_factory(self.conf)
+        dst.store_data(dst_data)
+        dst.close()
+
+    def get_accumulated_inp_data(self, skip_header: bool=True) -> data_types.InpData:
+        meta: list[data_types.Metadata] = []
+        records: data_types.InpRecords = []
+
+        src_urls: list[Url] = [Url(i.text) for i in self.conf.findall(r"Src/Urls/Url")]
+        for i, url in enumerate(src_urls):
+            src: AbstractReader = self.reader_factory(self.conf, url)
+            inp: data_types.InpData = src.get_parsed_data(skip_header=(skip_header or i > 0))
+            records += inp.records
+            meta += inp.metadata
+            src.close()
+        return data_types.InpData(metadata=meta, records=records)
 
 
 if __name__ == '__main__':

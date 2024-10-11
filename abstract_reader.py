@@ -9,10 +9,10 @@ logger = logging.getLogger('logger')
 
 class AbstractReader(object):
 
-    def __init__(self, global_config: config.Config):
+    def __init__(self, global_config: config.Config, src_url: Url):
         self.config: config.Config = global_config
         self.src_fields: tuple[str, ...] = self.get_src_fields()
-        self.url = Url(self.config.get_param_val(r'Src/Url'))
+        self.url: Url = src_url
         self.tmp_inp_dir = global_config.get_param_val(r'InputDataDir')
 
         logger.info("Src Url: %s" % self.url)
@@ -22,7 +22,7 @@ class AbstractReader(object):
         raise NotImplementedError
 
     @abstractmethod
-    def copy_data_to_tmp(self, filename: str) -> None:
+    def copy_data_to_tmp(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
