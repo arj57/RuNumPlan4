@@ -2,12 +2,16 @@
     <DryRun type="bool">false</DryRun>
     <InputDataDir>InputData</InputDataDir>
     <Src>
-<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-3xx.csv'</url>-->
-<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-4xx.csv'</url>-->
-<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-8xx.csv'</url>-->
-        <Url>file:testData/ABC-8xx.csv</Url>
-
-<!--        <url>'https://opendata.digital.gov.ru/downloads/ABC-9xx.csv'</url>-->
+        <Urls>
+<!--            <Url>file:testData/ABC-3xx.csv</Url>-->
+<!--            <Url>file:testData/ABC-4xx.csv</Url>-->
+<!--            <Url>file:testData/ABC-8xx.csv</Url>-->
+            <Url>file:testData/DEF-9xx.csv</Url>
+<!--             <Url>https://opendata.digital.gov.ru/downloads/ABC-3xx.csv</Url>-->
+<!--             <Url>https://opendata.digital.gov.ru/downloads/ABC-4xx.csv</Url>-->
+<!--             <Url>https://opendata.digital.gov.ru/downloads/ABC-8xx.csv</Url>-->
+<!--             <Url>https://opendata.digital.gov.ru/downloads/DEF-9xx.csv</Url>-->
+        </Urls>
         <CsvExtraParameters>
             <delimiter>;</delimiter>
             <lineterminator>\r\n</lineterminator>
@@ -47,50 +51,30 @@
         </SrcFields>
         <DstFields>
             <Field>
-                <Name>Abc</Name>
+                <Name>code</Name>
                 <Source>Abc</Source>
                 <Type>int</Type>
             </Field>
             <Field>
-                <Name>From</Name>
+                <Name>start</Name>
                 <Source>From</Source>
                 <Type>int</Type>
             </Field>
             <Field>
-                <Name>To</Name>
+                <Name>end</Name>
                 <Source>To</Source>
                 <Type>int</Type>
             </Field>
             <Field>
-                <Name>Capacity</Name>
-                <Source>Capacity</Source>
-                <Type>int</Type>
+                <Name>op_inn</Name>
+                <Source>Inn</Source>
+<!--                <Type>int</Type>-->
             </Field>
-<!--            <Field>-->
-<!--                <Name>OPERATOR</Name>-->
-<!--                <CopyFrom>-->
-<!--                    <Source>OPERATOR</Source>-->
-<!--                </CopyFrom>-->
-<!--                <Type>str</Type>-->
-<!--            </Field>-->
-<!--            <Field>-->
-<!--                <Name>REGION</Name>-->
-<!--                <CopyFrom>-->
-<!--                    <Source>REGION</Source>-->
-<!--                </CopyFrom>-->
-<!--                <Type>str</Type>-->
-<!--            </Field>-->
             <Field>
-                <Name>RegionId</Name>
-                <Source>Region</Source>
+                <Name>loc_id</Name>
+                <Source>GarRegion</Source>
                 <Type>str</Type>
 <!--                <Action>AddToLocationMap</Action>-->
-            </Field>
-            <Field>
-                <Name>Inn</Name>
-                <Source>Inn</Source>
-                <Action>AddToOpInnTitleMap</Action>
-                <Type>int</Type>
             </Field>
         </DstFields>
 
