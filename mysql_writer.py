@@ -36,8 +36,7 @@ class MysqlWriter(AbstractWriter):
 
     @override()
     def close(self):
-        self.conn.close()
-        self.conn = None
+        DbConnector.close_instance()
         logger.info('Connection to DB closed.')
 
     @override()

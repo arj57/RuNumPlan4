@@ -6,7 +6,7 @@ logger = app_logger.get_logger(__name__)
 
 
 class DbConnector:
-    __instance = None
+    __instance: mysql.connector.MySQLConnection = None
 
     def __init__(self, user: str, password: str, database: str, host: str, port: str) -> None:
         if not DbConnector.__instance:
@@ -35,6 +35,7 @@ class DbConnector:
     @staticmethod
     def close_instance() -> None:
         DbConnector.__instance.close()
+        DbConnector.__instance = None
 
 
 if __name__ == "__main__":
