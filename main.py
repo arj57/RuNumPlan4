@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import app_logger
 import data_types
+import utils
 from abstract_converter import AbstractConverter
 from config import Config
 import importlib
@@ -8,7 +11,9 @@ from abstract_reader import AbstractReader
 from data_types import OutData, InpData
 from num_plan_converter import NumPlanConverter
 from abstract_writer import AbstractWriter
+from singleton_git_repo import GitRepo
 from url import Url
+from git import Repo
 
 
 logger = app_logger.get_logger(__name__)
@@ -44,13 +49,19 @@ class RuNumPlan4:
         return writer_class(config)
 
     def process(self) -> None:
-        # TODO: check if data is fresh
         src_data: InpData = self.get_accumulated_inp_data(skip_header=True)
-        converter: AbstractConverter = NumPlanConverter(self.conf)
-        dst_data: OutData = converter.get_converted_data(src_data)
-        dst: AbstractWriter = self.writer_factory(self.conf)
-        dst.store_data(dst_data)
-        dst.close()
+        if self.is_data_changed():
+            logger.info("Получены новые данные.")
+            converter: AbstractConverter = NumPlanConverter(self.conf)
+            dst_data: OutData = converter.get_converted_data(src_data)
+            dst: AbstractWriter = self.writer_factory(self.conf)
+            dst.store_data(dst_data)
+            dst.close()
+            self.store_data_to_repo()
+            # TODO: store new data to repo
+            self.store_data_to_repo()
+        else:
+            logger.info("Данные не изменились. Нечего сохранять.")
 
     def get_accumulated_inp_data(self, skip_header: bool=True) -> data_types.InpData:
         meta: list[data_types.Metadata] = []
@@ -64,6 +75,24 @@ class RuNumPlan4:
             meta += inp.metadata
             src.close()
         return data_types.InpData(metadata=meta, records=records)
+
+    def is_data_changed(self) -> bool:
+        tmp_inp_dir = self.conf.get_param_val(r'InputDataDir')
+        abs_tmp_inp_dir = utils.get_abs_path(tmp_inp_dir)
+        repo: Repo = GitRepo.get_instance(abs_tmp_inp_dir)
+        return repo.is_dirty()
+
+    def store_data_to_repo(self) -> None:
+        logger.info("Сохранение данных в репозитории...")
+        tmp_inp_dir = self.conf.get_param_val(r'InputDataDir')
+        abs_tmp_inp_dir = utils.get_abs_path(tmp_inp_dir)
+        repo: Repo = GitRepo.get_instance(abs_tmp_inp_dir)
+        idx = repo.index
+        changed_files: list[str] = [item.a_path for item in idx.diff(None)]
+        idx.add(changed_files)
+        idx.commit(datetime.now().strftime("%Y.%m.%d %H:%M:%S"))
+        logger.info("Данные сохранены.")
+        # pass
 
 
 if __name__ == '__main__':

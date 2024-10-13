@@ -8,21 +8,9 @@ import data_types
 from url import Url
 from abc import abstractmethod
 import config
+import utils
 
 logger = logging.getLogger('logger')
-
-def get_abs_path(filename: str) -> str:
-    if os.path.isabs(filename):
-        abs_path = filename
-    else:
-        wd = os.path.abspath(os.path.curdir)
-        src_basename = os.path.basename(filename)
-        src_dirname = os.path.dirname(filename)
-        if src_dirname:
-            os.chdir(src_dirname)
-        abs_path = os.path.abspath(src_basename)
-        os.chdir(wd)
-    return abs_path
 
 
 class AbstractReader(object):
@@ -32,7 +20,7 @@ class AbstractReader(object):
         self.src_fields: tuple[str, ...] = self.get_src_fields()
         self.url: Url = src_url
         dd = global_config.get_param_val(r'InputDataDir')
-        self.abs_tmp_inp_dir = get_abs_path(dd)
+        self.abs_tmp_inp_dir = utils.get_abs_path(dd)
 
         logger.info("Src Url: %s Tmp input dir: %s" % (self.url.string, self.abs_tmp_inp_dir))
 

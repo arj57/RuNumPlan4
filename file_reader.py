@@ -1,4 +1,4 @@
-import abstract_reader
+import utils
 from abstract_reader import AbstractReader
 import app_logger
 import config
@@ -17,7 +17,7 @@ class FileReader(AbstractReader):
 
     @override()
     def copy_data_to_tmp(self) -> None:
-        abs_src_path = abstract_reader.get_abs_path(self.url.path)
+        abs_src_path = utils.get_abs_path(self.url.path)
         abs_tmp_path = os.path.join(self.abs_tmp_inp_dir, os.path.basename(abs_src_path))
         logger.info("Загружаем данные из '%s' в '%s'..." % (abs_src_path, abs_tmp_path))
         shutil.copy2(abs_src_path, self.abs_tmp_inp_dir)
