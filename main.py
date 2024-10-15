@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import app_logger
 import data_types
 import utils
@@ -12,8 +11,7 @@ from data_types import OutData, InpData
 from num_plan_converter import NumPlanConverter
 from abstract_writer import AbstractWriter
 from url import Url
-from git import Repo
-
+from git import Repo, InvalidGitRepositoryError
 
 logger = app_logger.get_logger(__name__)
 
@@ -75,19 +73,22 @@ class RuNumPlan4:
     def _get_git_repo(self) -> Repo:
         tmp_inp_dir = self.conf.get_param_val(r'InputDataDir')
         abs_tmp_inp_dir = utils.get_abs_path(tmp_inp_dir)
-        return Repo(abs_tmp_inp_dir)
+        try:
+            repo = Repo(abs_tmp_inp_dir)
+        except InvalidGitRepositoryError:
+            repo = Repo.init(abs_tmp_inp_dir)
+
+        return repo
 
     def is_data_changed(self) -> bool:
-        return self.repo.is_dirty()
+        return self.repo.is_dirty(untracked_files=True)
 
     def store_data_to_repo(self) -> None:
-        logger.info("Сохранение данных в репозитории...")
         idx = self.repo.index
-        changed_files: list[str] = [item.a_path for item in idx.diff(None)]
+        changed_files: list[str] = [item.a_path for item in idx.diff(None)] + self.repo.untracked_files
         idx.add(changed_files)
         idx.commit(datetime.now().strftime("%Y.%m.%d %H:%M:%S"))
         logger.info("Данные сохранены.")
-        # pass
 
 
 if __name__ == '__main__':
